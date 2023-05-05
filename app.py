@@ -102,11 +102,24 @@ def index():
 @app.route('/home', methods=['POST', 'GET'])
 @login_required
 def home():
+    searchResults = []
+    gid = request.args.get('gid')
+    if request.method == 'POST':
+        words = request.form['words']
+        gid = request.form['gid']
+        query = f"select * from messages where body like '%{words}%' and gid = {gid};"
+        searchResults = run_query(query)
+        searchResults = [list(m) for m in searchResults]
+        for m in searchResults:
+                groupsQuery = f"select username from user_ids where id = '{m[4]}';"
+                author = run_query(groupsQuery)
+                author = [a[0] for a in author]
+                m[4] = author[0]
     groupsQuery = f"select * from memberships where uid = '{session[USER]}';"
     groups = run_query(groupsQuery)
     messages = []
-    if request.args.get('gid'):
-        query = f"select * from messages where gid = {request.args.get('gid')};"
+    if gid:
+        query = f"select * from messages where gid = {gid};"
         messages = run_query(query)
         messages = [list(m) for m in messages]
         for m in messages:
@@ -114,7 +127,7 @@ def home():
             author = run_query(groupsQuery)
             author = [a[0] for a in author]
             m[4] = author[0]
-    return render_template('home.html', groups=groups, current_group=request.args.get('gid'), messages=messages)
+    return render_template('home.html', searchResults=searchResults, groups=groups, current_group=gid, messages=messages)
     
     
 @app.route('/add', methods=['POST'])

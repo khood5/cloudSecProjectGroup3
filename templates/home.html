@@ -2,59 +2,88 @@
 <html>
 
 <head>
-    <style type='text/css'>
-        #grousp_leftPanel {
-            width: 150px;
-            float: left;
-            border-right: 1px solid #666;
-            margin-right: 20px;
-            height: 100vh;
-        }
-
-        #msgs {
-            margin-left: auto;
-            margin-right: auto;
-            text-align: left;
-        }
-
-        #UserInfo {
-            width: 400px;
-            text-align: center;
-            display: inline;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
+
 <body>
-    <div id="grousp_leftPanel">
-        <h3>Group Chats</h3>
-        <ul>
-            {%for i in groups%}
-            <li><a href="{{url_for('home', gid=i[3])}}">{{i[3]}}</a></li>
-            {%endfor%}
-        </ul>
-    </div>
-    <div id="profile_rightPanel">
-        <div>
-            <div id="UserInfo">
-                <h1>Welcome {{ current_user.username }}</h1>
-                <h3>These are the messages in {{ current_group }}</h3>
-            </div>
-            <div id="msgs">
-                {%for i in messages%}
-                <p>{{i[4]}} >> {{i[2]}}</p><br>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Group Chats</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {%for i in groups%}
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{url_for('home', gid=i[3])}}">{{i[3]}}</a>
+                </li>
                 {%endfor%}
-                <br>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">These are the messages in {{ current_group }}</h5>
+                        <div id="profile_rightPanel">
+                            <div>
+                                <div id="msgs">
+                                    {%for i in messages%}
+                                    <p>{{i[4]}} >> {{i[2]}}</p><br>
+                                    {%endfor%}
+                                    <br>
+                                </div>
+                            </div>
+                            <form action="/add" method="post">
+                                <textarea name="message" rows="2" cols="30"
+                                    placeholder="enter your next message"></textarea>
+                                <input type="hidden" id="uid" name="uid" value="{{current_user.id}}">
+                                <input type="hidden" id="gid" name="gid" value="{{current_group}}">
+                                <br><br>
+                                <input type="submit">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card text-center">
+
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Search results in group {{ current_group }}</h5>
+                    <div>
+                        <form action="/home" method="post">
+                            <textarea name="words" rows="2" cols="30" placeholder="enter your next message"></textarea>
+                            <input type="hidden" id="gid" name="gid" value="{{current_group}}">
+                            <br><br>
+                            <input type="submit">
+                        </form>
+                        <div id="searchResults">
+                            {%for i in searchResults%}
+                            <p>{{i[4]}} >> {{i[2]}}</p><br>
+                            {%endfor%}
+                            <br>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <form action="/add" method="post">
-            <textarea name="message" rows="10" cols="30" placeholder="enter your next message"></textarea>
-            <input type="hidden" id="uid" name="uid" value="{{current_user.id}}">
-            <input type="hidden" id="gid" name="gid" value="{{current_group}}">
-            <br><br>
-            <input type="submit">
-        </form>
     </div>
 </body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
 
 </html>
