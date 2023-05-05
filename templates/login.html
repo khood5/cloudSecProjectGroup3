@@ -1,0 +1,11 @@
+<!doctype html>
+{% if error %}
+    <h1 style="color: red;">error: {{ error }}!</h1>
+{% endif %}
+<form action="/" method="post">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" placeholder="Username" value=""><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" value=""><br><br>
+    <input type="submit" value="Submit">
+</form> 

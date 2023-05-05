@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style type='text/css'>
+        #grousp_leftPanel {
+            width: 150px;
+            float: left;
+            border-right: 1px solid #666;
+            margin-right: 20px;
+            height: 100vh;
+        }
+
+        #msgs {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        #UserInfo {
+            width: 400px;
+            text-align: center;
+            display: inline;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="grousp_leftPanel">
+        <h3>Group Chats</h3>
+        <ul>
+            {%for i in groups%}
+            <li><a href="{{url_for('home', gid=i[3])}}">{{i[3]}}</a></li>
+            {%endfor%}
+        </ul>
+    </div>
+    <div id="profile_rightPanel">
+        <div>
+            <div id="UserInfo">
+                <h1>Welcome {{ current_user.username }}</h1>
+                <h3>These are the messages in {{ current_group }}</h3>
+            </div>
+            <div id="msgs">
+                {%for i in messages%}
+                <p>{{i[4]}} >> {{i[2]}}</p><br>
+                {%endfor%}
+                <br>
+            </div>
+        </div>
+        <form action="/add" method="post">
+            <textarea name="message" rows="10" cols="30" placeholder="enter your next message"></textarea>
+            <input type="hidden" id="uid" name="uid" value="{{current_user.id}}">
+            <input type="hidden" id="gid" name="gid" value="{{current_group}}">
+            <br><br>
+            <input type="submit">
+        </form>
+    </div>
+</body>
+
+</html>
