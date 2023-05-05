@@ -87,11 +87,11 @@ def index():
         password = request.form[PASSWORD]
         query = f" select * from user_ids where username = '{user}' and password = '{password}';"
         results= run_query(query)
-        userID = results[0][0]
         if int(len(results)) == 0:
             error = "wrong username or password"
             return render_template('login.html', error=error)
         else:
+            userID = results[0][0]
             u = load_user(userID)
             session[USER] = u.id
             login_user(u)
@@ -128,4 +128,4 @@ def add():
     return redirect(url_for('home', gid=gid))
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=80)
+  app.run(host='0.0.0.0', port=5000, debug = False)
