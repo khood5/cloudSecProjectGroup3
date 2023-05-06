@@ -1,0 +1,3 @@
+[submodule "cryptdb"]
+	path = cryptdb
+	url = https://github.com/CryptDB/cryptdb.git
