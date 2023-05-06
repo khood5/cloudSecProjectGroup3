@@ -19,7 +19,12 @@ USER = "user"
 mysql = MySQL(app)
 login_manager.init_app(app)
 
+################################################################################################################
+####         utlis avlable to all routes and functions                                                 
+################################################################################################################
 def run_query(q:str):
+    if q[-1] is not ';':
+        q = q + ';'
     print(f"running query: {q}")
     cursor = mysql.connection.cursor()
     cursor.execute(q)
@@ -30,9 +35,18 @@ def run_query(q:str):
     cursor.close()
     return result
 
+def getUserGroups():
+    groupsQuery = f"select * from memberships where uid = '{session[USER]}';"
+    groupMem = run_query(groupsQuery)
+    gids = [i[-1] for i in groupMem]
+    gids = ', '.join(gids)
+    getGroups = f"select * from group_id where id in ({gids});"
+    return run_query(getGroups)
+################################################################################################################
+####         User login, and maintacne functions and routes                                                 
+################################################################################################################
 class User:
     def __init__(self, username: str, password: str):
-        print("__init__")
         self.username = None
         self.password = None
         self.id = None
@@ -47,25 +61,19 @@ class User:
             return None
         
     def is_authenticated(self):
-        print("is_authenticated")
         if self.id is not None:
             return True
         return False
     
     def is_active(self):
-        print("is_active")
         if self.id is None:
-            print("is_active: False")
             return False
-        print("is_active: True")
         return True
     
     def is_anonymous(self):
-        print("is_anonymous")
         return False
     
     def get_id(self):
-        print(f"get_id{self.id}")
         return self.id
 
 @login_manager.user_loader
@@ -99,6 +107,14 @@ def index():
             return redirect(url_for('home'))
     return render_template('login.html', error = "")
 
+################################################################################################################
+####         Home page methods, routes and functions                                                        
+################################################################################################################
+
+## Route for home page
+# POST: used for posting a search request, needs search terms passed as <from> arguments 'words' and group id as 'gid' renders home normally otherwise a.k.a same as GET
+# GET: displays the messages in a group chat where the group id is passed as <URL> argument 'gid'
+# if no 'gid' is provided no messages will be shown note that in the in a POST request 'gid' is a form argument (a.k.a posted to the route) while a get request it's a url argument
 @app.route('/home', methods=['POST', 'GET'])
 @login_required
 def home():
@@ -115,8 +131,7 @@ def home():
                 author = run_query(groupsQuery)
                 author = [a[0] for a in author]
                 m[4] = author[0]
-    groupsQuery = f"select * from memberships where uid = '{session[USER]}';"
-    groups = run_query(groupsQuery)
+    groups = getUserGroups()
     messages = []
     if gid:
         query = f"select * from messages where gid = {gid};"
@@ -129,7 +144,9 @@ def home():
             m[4] = author[0]
     return render_template('home.html', searchResults=searchResults, groups=groups, current_group=gid, messages=messages)
     
-    
+## Route add message to a group chat
+# POST: takes a author (user id) as form argument 'uid' a group to post the message as 'gid' or group id and the message itself as 'message'
+# redirects to home page passing the group id as 'gid' after the message has been inserted into the DB
 @app.route('/add', methods=['POST'])
 @login_required
 def add():
@@ -140,5 +157,28 @@ def add():
     run_query(query)
     return redirect(url_for('home', gid=gid))
 
+################################################################################################################
+####         New group routes and functions                                                        
+################################################################################################################
+@app.route('/newgroup', methods=['GET', 'POST'])
+@login_required
+def newgroup():
+    if request.method == 'POST':
+        newGroupName = request.form['groupName']
+        uid = request.form['uid']
+        
+        if len(run_query(f"select * from group_id where name = '{newGroupName}'")) > 0:
+            return render_template('newgroup.html', groups=getUserGroups(), error="Group name is already taken")
+        
+        addGroupQuery = f"insert into group_id (name) values ('{newGroupName}')"
+        run_query(addGroupQuery)
+        newGroupID = run_query(f"select id from group_id where name = '{newGroupName}'")[0][0]
+        addCreaterAsMemberQuery = f"insert into memberships (gid, uid) values ('{newGroupID}','{uid}')"
+        run_query(addCreaterAsMemberQuery)
+    return render_template('newgroup.html', groups=getUserGroups())
+
+@app.route('/editgroup', methods=['GET', 'POST'])
+@login_required
+def editgroup():
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000, debug = False)
