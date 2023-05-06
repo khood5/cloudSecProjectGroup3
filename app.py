@@ -1,7 +1,7 @@
 # app.py
 from flask import Flask, redirect, url_for, render_template, request, session
 from flask_mysqldb import MySQL
-from flask_login import LoginManager, login_required, login_user
+from flask_login import LoginManager, login_required, login_user, logout_user
 
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = '10.37.0.31'
@@ -88,6 +88,7 @@ def load_user(user_id):
         return User(userInfo[2], userInfo[3])
 
 @app.route('/', methods=['POST', 'GET'])
+@app.route('/login', methods=['POST', 'GET'])
 def index():
     error = None
     if request.method == 'POST':
@@ -108,6 +109,11 @@ def index():
             return redirect(url_for('home'))
     return render_template('login.html', error = "")
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return render_template('login.html', error="")
 ################################################################################################################
 ####         Home page methods, routes and functions                                                        
 ################################################################################################################
