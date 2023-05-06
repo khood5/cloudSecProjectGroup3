@@ -6,10 +6,10 @@
         <div class="col-lg-6 mb-4">
             <div class="card text-center">
                 <div class="card-body">
-                    <h5 class="card-title">These are the messages in group {{ current_group }}</h5>
+                    <h5 class="card-title">These are the messages in group {{ groupName }}</h5>
                     <div id="profile_rightPanel">
                         <div>
-                            <div id="msgs">
+                            <div id="msgs" class="overflow-auto">
                                 {%for i in messages%}
                                 <p>{{i[4]}} >> {{i[2]}}</p><br>
                                 {%endfor%}
@@ -33,7 +33,7 @@
 
             </div>
             <div class="card-body">
-                <h5 class="card-title">Search results in group {{ current_group }}</h5>
+                <h5 class="card-title">Search results in group {{ groupName }}</h5>
                 <div>
                     <form action="/home" method="post">
                         <textarea name="words" rows="2" cols="30" placeholder="enter your next message"></textarea>
@@ -53,3 +53,5 @@
     </div>
 </div>
 {% endblock %}
+
+</html>

@@ -18,10 +18,13 @@
                 <!-- get list of groups -->
                 {%for i in groups%}
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{url_for('home', gid=i[3])}}">{{i[-1]}}</a>
+                    <a class="nav-link active" href="{{url_for('home', gid=i[0])}}">{{i[-1]}}</a>
                 </li>
                 {%endfor%}
                 <!-- new group link -->
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{url_for('editgroup', gid=session[GID])}}">edit current group</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link active" href="{{url_for('newgroup', uid=current_user.get_id())}}">new group</a>
                 </li>

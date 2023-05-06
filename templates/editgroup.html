@@ -1,5 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    error: {{ error }}!
+</div>
+{% endif %}
 
+<body class="text-center">
+    <form action="/editgroup" method="post">
+        <label for="groupName">Edit Group: </label><br>
+        <input type="text" id="groupName" name="groupName" placeholder="" value="{{groupName}}" readonly><br>
+        <input id="username" name="username" placeholder="a valid user name" value="">
+        <input type="submit" value="Submit">
+    </form>
+</body>
 {% endblock %}

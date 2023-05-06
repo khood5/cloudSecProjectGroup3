@@ -15,6 +15,7 @@ login_manager = LoginManager()
 USERNAME = "username"
 PASSWORD = "password"
 USER = "user"
+GID = "current_group"
 
 mysql = MySQL(app)
 login_manager.init_app(app)
@@ -119,11 +120,13 @@ def index():
 @login_required
 def home():
     searchResults = []
-    gid = request.args.get('gid')
+    session[GID] = request.args.get('gid')
+    print(f"session[GID]:{session[GID]}")
+    print(f"request:{request.args.get('gid')}")
     if request.method == 'POST':
         words = request.form['words']
-        gid = request.form['gid']
-        query = f"select * from messages where body like '%{words}%' and gid = {gid};"
+        session[GID] = request.form['gid']
+        query = f"select * from messages where body like '%{words}%' and gid = {session[GID]};"
         searchResults = run_query(query)
         searchResults = [list(m) for m in searchResults]
         for m in searchResults:
@@ -133,8 +136,8 @@ def home():
                 m[4] = author[0]
     groups = getUserGroups()
     messages = []
-    if gid:
-        query = f"select * from messages where gid = {gid};"
+    if session[GID]:
+        query = f"select * from messages where gid = {session[GID]};"
         messages = run_query(query)
         messages = [list(m) for m in messages]
         for m in messages:
@@ -142,20 +145,23 @@ def home():
             author = run_query(groupsQuery)
             author = [a[0] for a in author]
             m[4] = author[0]
-    return render_template('home.html', searchResults=searchResults, groups=groups, current_group=gid, messages=messages)
+    groupName = run_query(f"select * from group_id where id = '{session[GID]}'")
+    if groupName:
+        groupName = groupName[0][-1]
+    else:
+        groupName = None
+    return render_template('home.html', searchResults=searchResults, groups=groups, current_group=session[GID], messages=messages, groupName=groupName)
     
 ## Route add message to a group chat
-# POST: takes a author (user id) as form argument 'uid' a group to post the message as 'gid' or group id and the message itself as 'message'
+# POST: takes a group to post the message as 'gid' or group id and the message itself as 'message'
 # redirects to home page passing the group id as 'gid' after the message has been inserted into the DB
 @app.route('/add', methods=['POST'])
 @login_required
 def add():
-    uid = request.form['uid']
-    gid = request.form['gid']
     msg = request.form['message']
-    query = f"insert into messages (body, author, gid)values ('{msg}', {uid}, {gid});"
+    query = f"insert into messages (body, author, gid)values ('{msg}', {session[USER]}, {session[GID]});"
     run_query(query)
-    return redirect(url_for('home', gid=gid))
+    return redirect(url_for('home', gid=session[GID]))
 
 ################################################################################################################
 ####         New group routes and functions                                                        
@@ -165,20 +171,35 @@ def add():
 def newgroup():
     if request.method == 'POST':
         newGroupName = request.form['groupName']
-        uid = request.form['uid']
-        
         if len(run_query(f"select * from group_id where name = '{newGroupName}'")) > 0:
             return render_template('newgroup.html', groups=getUserGroups(), error="Group name is already taken")
         
         addGroupQuery = f"insert into group_id (name) values ('{newGroupName}')"
         run_query(addGroupQuery)
         newGroupID = run_query(f"select id from group_id where name = '{newGroupName}'")[0][0]
-        addCreaterAsMemberQuery = f"insert into memberships (gid, uid) values ('{newGroupID}','{uid}')"
+        addCreaterAsMemberQuery = f"insert into memberships (gid, uid) values ('{newGroupID}','{session[USER]}')"
         run_query(addCreaterAsMemberQuery)
     return render_template('newgroup.html', groups=getUserGroups())
 
 @app.route('/editgroup', methods=['GET', 'POST'])
 @login_required
 def editgroup():
+    if request.method == 'POST':
+        editgroupName = request.form['groupName']
+        newUsername = request.form['username']
+        group = run_query(f"select * from group_id where name = '{editgroupName}'")
+        if len(group) == 0:
+            return render_template('editgroup.html', groupName=editgroupName, error="Invalid Group name")
+        newUser = run_query(f"select * from user_ids where username = '{newUsername}'")
+        if len(newUser) == 0:
+            return render_template('editgroup.html', groupName=editgroupName, error="Invalid username")
+        run_query(f"insert into memberships (uid,gid) values ('{newUser[0][0]}','{group[0][0]}')")
+        return redirect(url_for('home', gid=group[0][0])) 
+    groupName = run_query(f"select * from group_id where id = '{session[GID]}'")
+    if groupName:
+        groupName = groupName[0][-1]
+    else:
+        groupName = None
+    return render_template('editgroup.html', groupName=groupName, groups=getUserGroups())
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000, debug = False)
