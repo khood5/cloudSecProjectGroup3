@@ -1,0 +1,52 @@
+-- SQLBook: Code
+-- https://www.oodlestechnologies.com/blogs/how-to-protect-data-saved-in-mysql-or-postgresql-using-cryptdb/
+-- https://github.com/CryptDB/cryptdb
+
+CREATE TABLE `group_id` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `name` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+
+INSERT INTO `group_id` VALUES (1,NULL,'1'),(2,NULL,'2'),(3,NULL,'3');
+
+CREATE TABLE `user_ids` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `username` varchar(255) DEFAULT NULL,
+    `password` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+INSERT INTO `user_ids` VALUES (1,NULL,'bob_saget','password'),(2,NULL,'fox_mulder','password'),(3,NULL,'dana_scully','password'),(4,NULL,'Nessie','password'),(5,NULL,'Sasquatch','password'),(6,NULL,'Chupacabras','password'),(7,NULL,'Abominable_Snowman','password'),(8,NULL,'Leeds_Devil','password');
+
+CREATE TABLE `memberships` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `uid` int NOT NULL,
+    `gid` int NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `membership_to_group` (`gid`),
+    KEY `membership_to_user` (`uid`),
+    CONSTRAINT `membership_to_group` FOREIGN KEY (`gid`) REFERENCES `group_id` (`id`),
+    CONSTRAINT `membership_to_user` FOREIGN KEY (`uid`) REFERENCES `user_ids` (`id`)
+);
+
+CREATE TABLE `memberships` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `uid` int NOT NULL,
+    `gid` int NOT NULL,
+    PRIMARY KEY (`id`));
+
+
+INSERT INTO `memberships` VALUES (6,NULL,1,1),(7,NULL,4,1),(8,NULL,2,2),(9,NULL,3,2),(10,NULL,4,3),(11,NULL,5,3),(12,NULL,6,3),(13,NULL,7,3),(14,NULL,8,3),(15,NULL,1,3);
+
+CREATE TABLE `messages` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `body` varchar(4000) DEFAULT NULL,
+  `gid` int NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
