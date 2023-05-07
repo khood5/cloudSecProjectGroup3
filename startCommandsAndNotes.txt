@@ -1,9 +1,0 @@
-ssh khood@10.37.0.31 => DB
-ssh khood@10.37.0.32 => flask
-
-mysql -uroot -pletmein -h 10.37.0.31 -P 3307 => connect to cryptDB proxy server
-
-Python app.py => start flask server
-
-=> start cryptDB proxy * sometimes the proxy dies needs to be restarted, use tmux to start it then detach to leave it running
-$EDBDIR/bins/proxy-bin/bin/mysql-proxy --plugins=proxy --event-threads=4 --max-open-files=1024 --proxy-lua-script=$EDBDIR/mysqlproxy/wrapper.lua --proxy-address=10.37.0.31:3307 --proxy-backend-addresses=localhost:3306
