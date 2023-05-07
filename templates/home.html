@@ -1,57 +1,86 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">These are the messages in group {{ groupName }}</h5>
-                    <div id="profile_rightPanel">
-                        <div>
-                            <div id="msgs" class="overflow-auto">
-                                {%for i in messages%}
-                                <p>{{i[4]}} >> {{i[2]}}</p><br>
-                                {%endfor%}
-                                <br>
+<style>
+    .chat-box {
+        height: 400px;
+        overflow-y: scroll;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">These are the messages in group {{ groupName }}</h5>
+                <div id="profile_rightPanel">
+                    <div class="chat-box bg-white">
+                        <div id="msgs">
+                            {%for i in messages%}
+                            <div class="media w-50 mb-3">
+                                <img src="https://i.postimg.cc/gjtPPQsn/Group-3.png" alt="user" width="50" class="rounded-circle">
+                                <div class="media-body ml-3">
+                                    <div class="bg-light rounded py-2 px-3 mb-2">
+                                        <p class="text-small mb-0 text-muted">{{i[4]}} : {{i[2]}}</p><br>
+                                    </div>
+                                    <p class="small text-muted">{{ i[1] }}</p>
+                                    <!-- <p class="small text-muted"><span class="timestamp"></span></p> -->
+                                </div>
                             </div>
+                            {%endfor%}
+                            <br>
                         </div>
-                        <form action="/add" method="post">
-                            <textarea name="message" rows="2" cols="30"
-                                placeholder="enter your next message"></textarea>
-                            <input type="hidden" id="uid" name="uid" value="{{current_user.id}}">
-                            <input type="hidden" id="gid" name="gid" value="{{current_group}}">
-                            <br><br>
-                            <input type="submit">
-                        </form>
                     </div>
+                    <form action="/add" method="post" enctype="multipart/form-data">
+                        <textarea name="message" rows="2" cols="30" placeholder="enter your next message"></textarea>
+                        <br>
+                        <input type="file" id="file" name="file" accept="image/*,video/*">
+                        <br><br>
+                        <input type="hidden" id="uid" name="uid" value="{{current_user.id}}">
+                        <input type="hidden" id="gid" name="gid" value="{{current_group}}">
+                        <input type="submit">
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card text-center">
-
-            </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title">Search results in group {{ groupName }}</h5>
-                <div>
-                    <form action="/home" method="post">
-                        <textarea name="words" rows="2" cols="30" placeholder="enter your next message"></textarea>
-                        <input type="hidden" id="gid" name="gid" value="{{current_group}}">
-                        <br><br>
-                        <input type="submit">
-                    </form>
+                <form action="/home" method="post">
+                    <textarea name="words" rows="2" cols="30" placeholder="enter your next message"></textarea>
+                    <input type="hidden" id="gid" name="gid" value="{{current_group}}">
+                    <br><br>
+                    <input type="submit">
+                </form>
+                <div class="chat-box bg-white">
                     <div id="searchResults">
-                        {%for i in searchResults%}
-                        <p>{{i[4]}} >> {{i[2]}}</p><br>
-                        {%endfor%}
-                        <br>
+                        {% for i in searchResults %}
+                        <div class="media w-50 mb-3">
+                            <img src="https://i.postimg.cc/gjtPPQsn/Group-3.png" alt="user" width="50" class="rounded-circle">
+                            <div class="media-body ml-3">
+                                <div class="bg-light rounded py-2 px-3 mb-2">
+                                    <p class="text-small mb-0 text-muted">{{ i[4] }} : {{ i[2] }}</p>
+                                </div>
+                                <p class="small text-muted">{{ i[1] }}</p>
+                                <!-- <p class="small text-muted"><span class="timestamp"></span></p>   -->
+                                <!-- result: [('1', '2023-05-06 12:39:40', '1')] -->
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var dt = new Date();
+    document.getElementById("datetime").innerHTML = dt.toLocaleString();
+    </script>
 {% endblock %}
 
 </html>
